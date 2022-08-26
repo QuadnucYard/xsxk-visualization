@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@types/dateformat": "^5.0.0",
     "typescript": "^4.6.4",
     "vite": "^3.0.7"
   },

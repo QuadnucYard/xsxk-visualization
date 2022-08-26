@@ -3,7 +3,6 @@ import { GridComponent, GridComponentOption } from "echarts/components";
 import { LineChart, LineSeriesOption } from "echarts/charts";
 import { UniversalTransition } from "echarts/features";
 import { CanvasRenderer } from "echarts/renderers";
-import axios from "axios";
 import dateFormat from "dateformat";
 
 echarts.use([GridComponent, LineChart, CanvasRenderer, UniversalTransition]);
@@ -15,50 +14,26 @@ interface DataItem {
   value: [string, number];
 }
 
-async function getData() {
-  const {
-    data: {
-      data: { currentTime, onlineCount },
-    },
-  } = await axios.post("http://newxk.urp.seu.edu.cn/xsxk/web/now");
-  const now = new Date(currentTime);
-  return {
-    name: now.toString(),
-    value: [dateFormat(now, "yyyy/m/d H:MM:ss"), onlineCount] as [string, number],
-  };
+export interface TimeEntry {
+  onlineCount: number;
+  currentTime: number;
 }
 
-export default class MyChart {
+export default class MyChart2 {
   data: DataItem[] = [];
   myChart: echarts.ECharts;
   timespan: number;
 
-  constructor(dom: HTMLElement, color: string, interval: number, timespan: number) {
+  constructor(dom: HTMLElement, color: string, timespan: number) {
     this.timespan = timespan;
 
     this.myChart = echarts.init(dom);
     let option: EChartsOption;
 
     option = {
-      grid: {
-        top: 40,
-        bottom: 40,
-        left: 60,
-        right: 0,
-      },
-      xAxis: {
-        type: "time",
-        splitLine: {
-          show: true,
-        },
-      },
-      yAxis: {
-        type: "value",
-        splitLine: {
-          show: true,
-        },
-        scale: true,
-      },
+      grid: { top: 40, bottom: 40, left: 60, right: 0 },
+      xAxis: { type: "time", splitLine: { show: true }, animation: false },
+      yAxis: { type: "value", splitLine: { show: true }, scale: true, animation: false },
       series: [
         {
           name: "Online Count",
@@ -66,21 +41,21 @@ export default class MyChart {
           showSymbol: true,
           data: this.data,
           color: color,
+          animation: false,
         },
       ],
     };
 
     option && this.myChart.setOption(option);
-
-    setInterval(this.addData, interval, this);
-    this.addData(this);
   }
 
-  async addData(self: MyChart) {
-    const item = await getData();
-    self.data.push(item);
-    const now = new Date(item.name);
-    while (now.getTime() - new Date(self.data[0].name).getTime() > self.timespan) {
+  async addData(self: MyChart2, item: TimeEntry) {
+    const stamp = item.currentTime;
+    self.data.push({
+      name: new Date(stamp).toString(),
+      value: [dateFormat(stamp, "yyyy/m/d H:MM:ss"), item.onlineCount] as [string, number],
+    });
+    while (stamp - new Date(self.data[0].name).getTime() > self.timespan) {
       self.data.shift();
     }
     self.myChart.setOption<EChartsOption>({
