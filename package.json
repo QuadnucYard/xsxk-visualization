@@ -11,5 +11,11 @@
   "devDependencies": {
     "typescript": "^4.6.4",
     "vite": "^3.0.7"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "dateformat": "^5.0.3",
+    "echarts": "^5.3.3",
+    "moment": "^2.29.4"
   }
 }
